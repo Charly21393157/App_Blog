@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -40,10 +41,8 @@ android {
 
 dependencies {
     //DOM
-
-    implementation (platform("com.google.firebase:firebase-bom:33.4.0"))
-
-
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
 // Navigation
     implementation ("androidx.navigation:navigation-fragment-ktx:2.8.2")
@@ -54,6 +53,7 @@ dependencies {
     implementation ("de.hdodenhof:circleimageview:3.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation(libs.firebase.messaging)
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
 // Viewmodel and livedata KTX"
