@@ -1,55 +1,73 @@
-package com.example.app_blog.ui.home
+package com.example.appblog.ui.home
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
-import com.example.app_blog.R
-import com.example.app_blog.core.Resource
-import com.example.app_blog.data.model.Post
-import com.example.app_blog.data.remote.HomeScreenDataSource
-import com.example.app_blog.databinding.FragmentHomeScreenBinding
-import com.example.app_blog.domain.HomeScreenRepoImplement
-import com.example.app_blog.presentation.HomeScreenViewModel
-import com.example.app_blog.presentation.HomeScreenViewModelFactory
-import com.example.app_blog.ui.home.adapter.HomeScreenAdapter
-import com.google.firebase.Timestamp
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.appblog.R
+import com.example.appblog.core.Result
+import com.example.appblog.core.hide
+import com.example.appblog.core.show
+import com.example.appblog.data.remote.home.HomeScreenDataSource
+import com.example.appblog.databinding.FragmentHomeScreenBinding
+import com.example.app_blog.domain.home.HomeScreenRepoImpl
+import com.example.appblog.presentation.home.HomeScreenViewModel
+import com.example.appblog.presentation.home.HomeScreenViewModelFactory
+import com.example.appblog.ui.home.adapter.HomeScreenAdapter
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class HomeScreenFragment : Fragment(R.layout.fragment_home_screen) {
+
     private lateinit var binding: FragmentHomeScreenBinding
     private val viewModel by viewModels<HomeScreenViewModel> {
-        HomeScreenViewModelFactory(HomeScreenRepoImplement(
-            HomeScreenDataSource()
-        ))}
+        HomeScreenViewModelFactory(
+                HomeScreenRepoImpl(
+                        HomeScreenDataSource()
+                )
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentHomeScreenBinding.bind(view)
-        viewModel.fetchLatestPosts().observe(viewLifecycleOwner, Observer
-        { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
 
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.rvHome.adapter = HomeScreenAdapter(result.data)
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                is Resource.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Ocurrió un error: ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                viewModel.latestPosts.collect { result ->
+                    when (result) {
+                        is Result.Loading -> {
+                            binding.progressBar.show()
+                        }
+
+                        is Result.Success -> {
+                            binding.progressBar.hide()
+                            if(result.data.isEmpty()) {
+                                binding.emptyContainer.show()
+                                return@collect
+                            }else{
+                                binding.emptyContainer.hide()
+                            }
+                            binding.rvHome.adapter = HomeScreenAdapter(result.data)
+                        }
+
+                        is Result.Failure -> {
+                            binding.progressBar.hide()
+                            Toast.makeText(
+                                requireContext(),
+                                "Ocurrio un error: ${result.exception}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 }
             }
-
-        })
-    }    //despues de crea la lista arriba
+        }
+    }
 }

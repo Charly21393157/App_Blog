@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.app_blog" />
-                  <option name="mobileSdkAppId" value="1:171371048722:android:f4a4cdbb3cded51d988dcb" />
+                  <option name="appId" value="com.example.appblog" />
+                  <option name="mobileSdkAppId" value="1:171371048722:android:19dd7a8f3078ca29988dcb" />
                   <option name="projectId" value="blog-app-2cc86" />
                   <option name="projectNumber" value="171371048722" />
                 </ConnectionSetting>
